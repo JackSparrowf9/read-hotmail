@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   const fetchEmails = (email, password) => {
-    fetch('http://127.0.0.1:5000/read_emails', {
+    fetch('https://Duc111000.pythonanywhere.com/read_emails', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
