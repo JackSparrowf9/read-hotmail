@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const apiUrl = 'http://localhost:5000/read_emails';
+  const apiUrl = 'https://read-hotmail.vercel.app/read_emails';
   const fetchButton = document.getElementById('fetch-button');
   const credentialsInput = document.getElementById('credentials');
   const inboxList = document.getElementById('inbox-list');
@@ -26,13 +26,13 @@ document.addEventListener('DOMContentLoaded', () => {
     startTime = performance.now();
     const credentials = credentialsInput.value.trim();
     if (!credentials) {
-      alert('Please enter your credentials');
+      console.log('Please enter your credentials');
       return;
     }
 
     const [usernamePart, password] = credentials.split('hotmail.com');
     if (!usernamePart || !password) {
-      alert('Please enter credentials in the format: email@hotmail.com password');
+      console.log('Please enter credentials in the format: email@hotmail.com password');
       return;
     }
 
@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
           fetchButton.textContent = 'Fetch Emails';
         })
         .catch(error => {
-          alert('Error fetching emails: ' + error.message);
+          console.log('Error fetching emails: ' + error.message);
         })
         // .finally(() => {
         //   isFetching = false;
