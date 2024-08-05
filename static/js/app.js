@@ -40,55 +40,58 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   const fetchEmails = (email, password) => {
-    fetch('https://Duc111000.pythonanywhere.com/read_emails', {
+    fetch('http://localhost:5000/read_emails', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ username: email, password: password }),
     })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        inboxList.innerHTML = ''; // Xóa danh sách email khi nhận dữ liệu mới
-        junkList.innerHTML = '';
+        .then(response => {
+          if (!response.ok) {
+            if (response.status === 500) {
+              return fetchEmails(email, password);
+            }
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          inboxList.innerHTML = '';
+          junkList.innerHTML = '';
 
-        if (data.inbox.length === 0) {
-          inboxList.innerHTML = '<li>No emails found in inbox.</li>';
-        } else {
-          data.inbox.forEach(email => {
-            const li = document.createElement('li');
-            li.innerHTML = `<strong>Subject:</strong> ${email.Subject}<br /><strong>From:</strong> ${email.From}<br /><strong>Date:</strong> ${new Date(email.Date).toLocaleString()}`;
-            li.addEventListener('click', () => openModal(email));
-            inboxList.appendChild(li);
-          });
-        }
+          if (data.inbox.length === 0) {
+            inboxList.innerHTML = '<li>No emails found in inbox.</li>';
+          } else {
+            data.inbox.forEach(email => {
+              const li = document.createElement('li');
+              li.innerHTML = `<strong>Subject:</strong> ${email.Subject}<br /><strong>From:</strong> ${email.From}<br /><strong>Date:</strong> ${new Date(email.Date).toLocaleString()}`;
+              li.addEventListener('click', () => openModal(email));
+              inboxList.appendChild(li);
+            });
+          }
 
-        if (data.junk.length === 0) {
-          junkList.innerHTML = '<li>No emails found in junk.</li>';
-        } else {
-          data.junk.forEach(email => {
-            const li = document.createElement('li');
-            li.innerHTML = `<strong>Subject:</strong> ${email.Subject}<br /><strong>From:</strong> ${email.From}<br /><strong>Date:</strong> ${new Date(email.Date).toLocaleString()}`;
-            li.addEventListener('click', () => openModal(email));
-            junkList.appendChild(li);
-          });
-        }
-      })
-      .catch(error => {
-        console.error('Error fetching emails:', error);
-        alert('Error fetching emails. Please check console for details.');
-      })
-      .finally(() => {
-        isFetching = false;
-        fetchButton.disabled = false;
-        fetchButton.textContent = 'Fetch Emails';
-      });
-  };
+          if (data.junk.length === 0) {
+            junkList.innerHTML = '<li>No emails found in junk.</li>';
+          } else {
+            data.junk.forEach(email => {
+              const li = document.createElement('li');
+              li.innerHTML = `<strong>Subject:</strong> ${email.Subject}<br /><strong>From:</strong> ${email.From}<br /><strong>Date:</strong> ${new Date(email.Date).toLocaleString()}`;
+              li.addEventListener('click', () => openModal(email));
+              junkList.appendChild(li);
+            });
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching emails:', error);
+        })
+        .finally(() => {
+          isFetching = false;
+          fetchButton.disabled = false;
+          fetchButton.textContent = 'Fetch Emails';
+        });
+    }
+
 
   const openModal = (email) => {
     modalSubject.textContent = email.Subject;
