@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+  const apiUrl = 'http://localhost:5000/read_emails';
   const fetchButton = document.getElementById('fetch-button');
   const credentialsInput = document.getElementById('credentials');
   const inboxList = document.getElementById('inbox-list');
@@ -9,9 +10,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalFrom = document.getElementById('modal-from');
   const modalBody = document.getElementById('modal-body');
   const closeModal = document.querySelector('.close');
+  const resultEl = document.getElementById('result');
   let isFetching = false;
+  let counter = 0;
+  let startTime = 0;
+
+  credentialsInput.addEventListener('keyup', function(event) {
+    if (event.keyCode === 13) {
+      fetchButton.click();
+    }
+  });
 
   fetchButton.addEventListener('click', () => {
+    counter = 0;
+    startTime = performance.now();
     const credentials = credentialsInput.value.trim();
     if (!credentials) {
       alert('Please enter your credentials');
@@ -33,14 +45,17 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchButton.disabled = true;
     fetchButton.textContent = 'Fetching...';
 
-    inboxList.innerHTML = ''; // Xóa danh sách email khi bắt đầu fetch
+    // Xóa danh sách email khi bắt đầu fetch
+    resultEl.innerHTML = '';
+    inboxList.innerHTML = '';
     junkList.innerHTML = '';
 
     fetchEmails(email, trimmedPassword);
   });
 
   const fetchEmails = (email, password) => {
-    fetch('http://localhost:5000/read_emails', {
+    counter++;
+    fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -50,54 +65,60 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(response => {
           if (!response.ok) {
             if (response.status === 500) {
+              resultEl.innerHTML = '<li>Fetching error, trying again...</li>'
               return fetchEmails(email, password);
             }
             throw new Error(`HTTP error! status: ${response.status}`);
           }
+
           return response.json();
         })
         .then(data => {
-          inboxList.innerHTML = '';
-          junkList.innerHTML = '';
+          displayEmail(data.inbox, inboxList);
+          displayEmail(data.junk, junkList);
 
-          if (data.inbox.length === 0) {
-            inboxList.innerHTML = '<li>No emails found in inbox.</li>';
-          } else {
-            data.inbox.forEach(email => {
-              const li = document.createElement('li');
-              li.innerHTML = `<strong>Subject:</strong> ${email.Subject}<br /><strong>From:</strong> ${email.From}<br /><strong>Date:</strong> ${new Date(email.Date).toLocaleString()}`;
-              li.addEventListener('click', () => openModal(email));
-              inboxList.appendChild(li);
-            });
-          }
-
-          if (data.junk.length === 0) {
-            junkList.innerHTML = '<li>No emails found in junk.</li>';
-          } else {
-            data.junk.forEach(email => {
-              const li = document.createElement('li');
-              li.innerHTML = `<strong>Subject:</strong> ${email.Subject}<br /><strong>From:</strong> ${email.From}<br /><strong>Date:</strong> ${new Date(email.Date).toLocaleString()}`;
-              li.addEventListener('click', () => openModal(email));
-              junkList.appendChild(li);
-            });
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching emails:', error);
-        })
-        .finally(() => {
+          let endTime = performance.now();
+          let elapsedTime = (endTime - startTime) / 1000;
+          resultEl.innerHTML = `<li>Success after ${counter} try. Process in ${Number(elapsedTime.toFixed(3))}s</li>`;
           isFetching = false;
           fetchButton.disabled = false;
           fetchButton.textContent = 'Fetch Emails';
-        });
+        })
+        .catch(error => {
+          alert('Error fetching emails: ' + error.message);
+        })
+        // .finally(() => {
+        //   isFetching = false;
+        //   fetchButton.disabled = false;
+        //   fetchButton.textContent = 'Fetch Emails';
+        // });
     }
 
+  const displayEmail = (emails, emailEl) => {
+    emailEl.innerHTML = '';
+    if (!emails.length) {
+      return emailEl.innerHTML = '<li>No emails found.</li>';
+    }
+
+    emails.forEach(email => {
+      const li = document.createElement('li');
+      li.innerHTML = `<strong>Subject:</strong> ${email.Subject}<br /><strong>From:</strong> ${email.From}<br /><strong>Date:</strong> ${new Date(email.Date).toLocaleString()}`;
+      li.addEventListener('click', () => openModal(email));
+
+      if (email.Subject.includes('khóa')) {
+        li.classList.add('blocked-account');
+      }
+
+      emailEl.appendChild(li);
+    });
+  }
 
   const openModal = (email) => {
     modalSubject.textContent = email.Subject;
     modalFrom.textContent = email.From;
-    modalBody.innerHTML = email.Body.replace(/\n/g, '<br />');  // Thay đổi để hiển thị body dạng HTML
-    modal.style.display = 'block';
+    modalBody.innerHTML = email.Body.replace(/\n/g, '');  // Thay đổi để hiển thị body dạng HTML
+    // modalBody.innerHTML = email.Body.replace(/\n/g, '<br />');  // Thay đổi để hiển thị body dạng HTML
+    modal.style.display = 'flex';
   };
 
   closeModal.addEventListener('click', () => {

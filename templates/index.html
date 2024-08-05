@@ -17,6 +17,10 @@
   <button id="fetch-button">Fetch Emails</button>
   <div class="result">
     <div class="mail-group">
+      <h2>Result</h2>
+      <ul id="result"></ul>
+    </div>
+    <div class="mail-group">
       <h2>Inbox</h2>
       <ul id="inbox-list"></ul>
     </div>
@@ -30,10 +34,12 @@
 <!-- Modal -->
 <div id="modal" class="modal">
   <div class="modal-content">
-    <span class="close">&times;</span>
-    <h2 id="modal-subject"></h2>
-    <p><strong>From:</strong> <span id="modal-from"></span></p>
-    <div id="modal-body" class="modal-body"></div>
+    <div class="modal-content-inner">
+      <span class="close">&times;</span>
+      <h2 id="modal-subject"></h2>
+      <p><strong>From:</strong> <span id="modal-from"></span></p>
+      <div id="modal-body" class="modal-body"></div>
+    </div>
   </div>
 </div>
 
