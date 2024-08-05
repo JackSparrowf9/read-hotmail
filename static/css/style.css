@@ -1,5 +1,19 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 .App {
     text-align: center;
+}
+
+.container {
+    padding: 20px
+}
+
+h1 {
+    margin-bottom: 40px;
 }
 
 
@@ -12,7 +26,7 @@
 }
 
 .mail-group {
-    margin: 20px;
+    margin-bottom: 20px;
 }
 
 ul {
@@ -179,7 +193,7 @@ button {
     list-style-type: none;
     padding: 0;
     display: grid;
-    grid-template-columns: auto auto auto;
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
 }
 
