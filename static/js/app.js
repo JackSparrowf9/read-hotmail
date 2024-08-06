@@ -15,10 +15,17 @@ document.addEventListener('DOMContentLoaded', () => {
   let counter = 0;
   let startTime = 0;
 
+  credentialsInput.focus();
   credentialsInput.addEventListener('keyup', function(event) {
     if (event.keyCode === 13) {
       fetchButton.click();
     }
+  });
+
+  credentialsInput.addEventListener('paste', function(event) {
+    setTimeout(() => {
+      fetchButton.click();
+    }, 100);
   });
 
   fetchButton.addEventListener('click', () => {
@@ -64,10 +71,11 @@ document.addEventListener('DOMContentLoaded', () => {
     })
         .then(response => {
           if (!response.ok) {
-            if (response.status === 500) {
-              resultEl.innerHTML = '<li>Fetching error, trying again...</li>'
+            if (response.status >= 500) {
+              resultEl.innerHTML = `<li>Fetching error, trying again <span class="warning">${counter}</span> times ...</li>`;
               return fetchEmails(email, password);
             }
+
             throw new Error(`HTTP error! status: ${response.status}`);
           }
 
@@ -85,7 +93,12 @@ document.addEventListener('DOMContentLoaded', () => {
           fetchButton.textContent = 'Fetch Emails';
         })
         .catch(error => {
-          console.log('Error fetching emails: ' + error.message);
+          resultEl.innerHTML =
+              `<li>
+                Fetching error, check the console for detail: ${error.message}
+                </br>Try again <span class="warning">${counter}</span> times ...
+              </li>`;
+          console.log('Error fetching emails: ' + error);
         })
         // .finally(() => {
         //   isFetching = false;

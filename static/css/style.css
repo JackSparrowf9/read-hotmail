@@ -205,9 +205,13 @@ button {
 }
 
 .mail-group li:hover {
-    background-color: #4f77a9;
+    background-color: #c5c5c5;;
 }
 
 .blocked-account {
     color: red;
+}
+
+.warning {
+    color: yellow;
 }
